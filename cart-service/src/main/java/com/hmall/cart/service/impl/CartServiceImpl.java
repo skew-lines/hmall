@@ -1,6 +1,7 @@
 package com.hmall.cart.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,6 +16,8 @@ import com.hmall.common.utils.BeanUtils;
 import com.hmall.common.utils.CollUtils;
 import com.hmall.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -45,6 +48,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     //private final IItemService itemService;
 
     private final RestTemplate restTemplate;
+    private final DiscoveryClient discoveryClient;
 
 
     @Override
@@ -95,16 +99,25 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         Set<Long> itemIds = vos.stream().map(CartVO::getItemId).collect(Collectors.toSet());
 
         // 2.查询商品
-        // 2.1发送Http请求
+        // 2.1获取服务实例列表
+        List<ServiceInstance> instances = discoveryClient.getInstances("item-service");
+
+        if(CollUtils.isEmpty(instances)) {
+            return;
+        }
+        //2.2负载均衡，挑选实例
+        ServiceInstance instance = instances.get(RandomUtil.randomInt(instances.size()));
+
+        // 2.3发送Http请求
         ResponseEntity<List<ItemDTO>> response = restTemplate.exchange(
-                "http://localhost:8081/items/?ids={ids}",
+                instance.getUri() + "/items/?ids={ids}",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<ItemDTO>>() {
                 },
                 Map.of("ids", CollectionUtil.join(itemIds, ","))
         );
-        // 2.2 解析response
+        // 2.4 解析response
         if(!response.getStatusCode().is2xxSuccessful()) return;
         List<ItemDTO> items = response.getBody();
 
