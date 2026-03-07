@@ -3,8 +3,6 @@ package com.hmall.item;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
 
 //替代@Mapper
 @MapperScan("com.hmall.item.mapper")
@@ -13,5 +11,4 @@ public class ItemApplication {
     public static void main(String[] args) {
         SpringApplication.run(ItemApplication.class, args);
     }
-
 }

@@ -9,6 +9,7 @@
         <version>1.0.0</version>
     </parent>
 
+    <groupId>org.lixi</groupId>
     <artifactId>item-service</artifactId>
 
     <properties>
@@ -43,6 +44,11 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <!--OK http 的依赖 -->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-okhttp</artifactId>
         </dependency>
     </dependencies>
     <build>
