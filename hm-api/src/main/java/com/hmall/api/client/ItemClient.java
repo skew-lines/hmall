@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * @author xi
- * @create 2023/10/22- 22:57
- */
 @FeignClient(value = "item-service", fallbackFactory = ItemClientFallbackFactory.class)
 public interface ItemClient {
     @GetMapping("/items")

@@ -10,11 +10,6 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * <p>
- * 支付订单
- * </p>
- */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)

@@ -1,16 +1,14 @@
 package com.hmall.api.config;
 
+import com.hmall.api.fallback.CartClientFallbackFactory;
 import com.hmall.api.fallback.ItemClientFallbackFactory;
+import com.hmall.api.fallback.TradeFallbackFactory;
 import com.hmall.common.utils.UserContext;
 import feign.Logger;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import org.springframework.context.annotation.Bean;
 
-/**
- * @author xi
- * @create 2023/10/22- 23:14
- */
 public class DefaultFeignConfig {
     @Bean
     public Logger.Level feignLogLevel(){
@@ -38,4 +36,10 @@ public class DefaultFeignConfig {
     public ItemClientFallbackFactory itemClientFallbackFactory() {
         return new ItemClientFallbackFactory();
     }
+
+    @Bean
+    public CartClientFallbackFactory cartClientFallbackFactory() {return  new CartClientFallbackFactory();}
+
+    @Bean
+    public TradeFallbackFactory tradeFallbackFactory() {return  new TradeFallbackFactory();}
 }
