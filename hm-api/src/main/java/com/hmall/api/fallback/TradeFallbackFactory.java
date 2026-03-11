@@ -12,6 +12,7 @@ public class TradeFallbackFactory implements FallbackFactory<TradeClient> {
             @Override
             public void markOrderPaySuccess(Long orderId) {
                 log.error("订单支付失败",cause);
+                throw new RuntimeException("订单支付失败");
             }
         };
     }

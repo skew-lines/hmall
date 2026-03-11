@@ -17,8 +17,8 @@ import com.hmall.trade.service.IOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,12 +81,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    @Transactional
     public void markOrderPaySuccess(Long orderId) {
         Order order = new Order();
         order.setId(orderId);
-        order.setStatus(2);
+        throw new RuntimeException("测试修改订单状态失败");
+/*        order.setStatus(2);
         order.setPayTime(LocalDateTime.now());
-        updateById(order);
+        updateById(order);*/
     }
 
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {

@@ -14,6 +14,7 @@ public class CartClientFallbackFactory implements FallbackFactory<CartClient> {
             @Override
             public void deleteCartItemByIds(Collection<Long> ids) {
                 log.error("批量删除购物车中商品失败",cause);
+                throw new RuntimeException("批量删除购物车中商品失败");
             }
         };
     }

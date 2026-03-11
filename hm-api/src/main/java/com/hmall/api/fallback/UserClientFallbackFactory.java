@@ -12,6 +12,7 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
             @Override
             public void deductMoney(String pw, Integer amount) {
                 log.error("扣减余额失败",cause);
+                throw new RuntimeException("扣减余额失败");
             }
         };
     }
