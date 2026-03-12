@@ -16,9 +16,14 @@ import com.hmall.trade.service.IOrderDetailService;
 import com.hmall.trade.service.IOrderService;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +37,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     private final ItemClient itemClient;
     private final IOrderDetailService detailService;
     private final CartClient cartClient;
+
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     //@Transactional
@@ -67,16 +74,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         // 2.保存订单详情
         List<OrderDetail> details = buildDetails(order.getId(), items, itemNumMap);
         detailService.saveBatch(details);
-
         // 3.扣减库存
         try {
             itemClient.deductStock(detailDTOS);
         } catch (Exception e) {
             throw new RuntimeException("库存不足！");
         }
-
         // 4.清理购物车商品
-        cartClient.deleteCartItemByIds(itemIds);
+        //fegin远程调用
+        //cartClient.deleteCartItemByIds(itemIds);
+        //MQ发布消息
+        //但是缺少用户id
+        try {
+            rabbitTemplate.convertAndSend("trade.topic", "order.create", itemIds, new MessagePostProcessor() {
+                @Override
+                public Message postProcessMessage(Message message) throws AmqpException {
+                    message.getMessageProperties().setHeader("userId",UserContext.getUser());
+                    return message;
+                }
+            });
+        } catch (Exception e) {
+            log.error("清理购物车商品的消息发送失败",e);
+        }
+
         return order.getId();
     }
 
@@ -85,10 +105,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void markOrderPaySuccess(Long orderId) {
         Order order = new Order();
         order.setId(orderId);
-        throw new RuntimeException("测试修改订单状态失败");
-/*        order.setStatus(2);
+//        throw new RuntimeException("测试修改订单状态失败");
+        order.setStatus(2);
         order.setPayTime(LocalDateTime.now());
-        updateById(order);*/
+        updateById(order);
     }
 
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {
