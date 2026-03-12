@@ -1,9 +1,6 @@
 package com.hmall.api.config;
 
-import com.hmall.api.fallback.CartClientFallbackFactory;
-import com.hmall.api.fallback.ItemClientFallbackFactory;
-import com.hmall.api.fallback.TradeFallbackFactory;
-import com.hmall.api.fallback.UserClientFallbackFactory;
+import com.hmall.api.fallback.*;
 import com.hmall.common.utils.UserContext;
 import feign.Logger;
 import feign.RequestInterceptor;
@@ -46,4 +43,7 @@ public class DefaultFeignConfig {
 
     @Bean
     public UserClientFallbackFactory userClientFallbackFactory() {return new UserClientFallbackFactory();}
+
+    @Bean
+    public PayClientFallbackFactory payClientFallbackFactory() {return new PayClientFallbackFactory();}
 }

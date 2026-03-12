@@ -8,6 +8,7 @@ import com.hmall.api.dto.ItemDTO;
 import com.hmall.api.dto.OrderDetailDTO;
 import com.hmall.common.exception.BadRequestException;
 import com.hmall.common.utils.UserContext;
+import com.hmall.trade.constants.MQConstants;
 import com.hmall.trade.domain.dto.OrderFormDTO;
 import com.hmall.trade.domain.po.Order;
 import com.hmall.trade.domain.po.OrderDetail;
@@ -97,6 +98,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             log.error("清理购物车商品的消息发送失败",e);
         }
 
+        // 5.发送延迟消息
+        rabbitTemplate.convertAndSend(
+                MQConstants.DELAY_EXCHANGE_NAME,
+                MQConstants.DELAY_ORDER_KEY,
+                order.getId(),
+                message -> {
+                    message.getMessageProperties().setDelay(1000);
+                    return message;
+                }
+        );
+
         return order.getId();
     }
 
@@ -109,6 +121,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setStatus(2);
         order.setPayTime(LocalDateTime.now());
         updateById(order);
+    }
+
+    // TODO 取消订单，订单标记为已锁定 恢复库存
+    @Override
+    public void cancelOrder(Long orderId) {
+
     }
 
     private List<OrderDetail> buildDetails(Long orderId, List<ItemDTO> items, Map<Long, Integer> numMap) {
